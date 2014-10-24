@@ -1,0 +1,246 @@
+heat_template_version: 2014-10-24
+
+description: >
+  Provision 3 nodes to run seti@home
+
+# Set parameters for input and stack provision time
+parameters:
+  key_name:
+    description: Name of an existing SSH keypair to inject into the instance
+    type: string
+    constraints:
+      - length: { min: 1, max: 255 }
+        description: Key name must be between 1 and 255 characters
+      - allowed_pattern: "[\\x20-\\x7E]*"
+        description: Key name can contain only ASCII characters
+  flavor_size:
+    description: The flavor required for the instance
+    type: string
+    default: "m1.small"
+    constraints:
+      - allowed_values: [m1.tiny, m1.small, m1.medium, m1.large]
+  os_image:
+    description: The name of a template to deploy
+    type: string
+    default: "seti-f20-x86_64"
+  privnet_id:
+    type: string
+    description: Private Network ID (From neutron net-list)
+  privsubnet_id:
+    type: string
+    description: Private Subnet ID (From neutron subnet-list)
+  pubnet_id:
+    type: string
+    description: Public Network ID (From neutron net-list)
+  node0_hostname:
+    description: Node hostname
+    type: string
+    default: seti0
+    constraints:
+      - length: {min: 1}
+  node1_hostname:
+    description: Node hostname
+    type: string
+    default: seti1
+    constraints:
+      - length: {min: 1}
+  node2_hostname:
+    description: Node hostname
+    type: string
+    default: seti2
+    constraints:
+      - length: {min: 1}
+  node3_hostname:
+    description: Node hostname
+    type: string
+    default: seti3
+    constraints:
+      - length: {min: 1}
+  seti_account_key:
+    description: seti@home account key
+    type: string
+resources:
+  # Create an Instance
+  node0:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node0_hostname }
+      flavor: { get_param: flavor_size }
+      image: { get_param: os_image }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: node0_port0 }
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -x
+            export SETI_ACCOUNT_KEY=P_SETI_ACCOUNT_KEY
+            echo "MTU=1450" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+            service network restart
+            hostname seti0.cloud.example.com
+            echo "" > /var/lib/boinc/gui_rpc_auth.cfg
+            systemctl enable boinc-client
+            systemctl start boinc-client
+            # wait for boinc to settle
+            sleep 30
+            boinccmd --project_attach http://setiathome.berkeley.edu $SETI_ACCOUNT_KEY
+          params:
+            P_SETI_ACCOUNT_KEY: { get_param: seti_account_key}
+
+  # Create a Network Port for that instance
+  node0_port0:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: privnet_id }
+      fixed_ips:
+        - subnet_id: { get_param: privsubnet_id }
+  # Associate a floating IP to that instance
+  node0_public:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: pubnet_id }
+      port_id: { get_resource: node0_port0 }
+  node1:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node1_hostname }
+      flavor: { get_param: flavor_size }
+      image: { get_param: os_image }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: node1_port0 }
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -x
+            export SETI_ACCOUNT_KEY=P_SETI_ACCOUNT_KEY
+            echo "MTU=1450" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+            service network restart
+            hostname seti1.cloud.example.com
+            echo "" > /var/lib/boinc/gui_rpc_auth.cfg
+            systemctl enable boinc-client
+            systemctl start boinc-client
+            # wait for boinc to settle
+            sleep 30
+            boinccmd --project_attach http://setiathome.berkeley.edu $SETI_ACCOUNT_KEY
+          params:
+            P_SETI_ACCOUNT_KEY: { get_param: seti_account_key}
+
+  # Create a Network Port for that instance
+  node1_port0:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: privnet_id }
+      fixed_ips:
+        - subnet_id: { get_param: privsubnet_id }
+  # Associate a floating IP to that instance
+  node1_public:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: pubnet_id }
+      port_id: { get_resource: node1_port0 }
+  node2:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node2_hostname }
+      flavor: { get_param: flavor_size }
+      image: { get_param: os_image }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: node2_port0 }
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -x
+            export SETI_ACCOUNT_KEY=P_SETI_ACCOUNT_KEY
+            echo "MTU=1450" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+            service network restart
+            hostname seti2.cloud.example.com
+            echo "" > /var/lib/boinc/gui_rpc_auth.cfg
+            systemctl enable boinc-client
+            systemctl start boinc-client
+            # wait for boinc to settle
+            sleep 30
+            boinccmd --project_attach http://setiathome.berkeley.edu $SETI_ACCOUNT_KEY
+          params:
+            P_SETI_ACCOUNT_KEY: { get_param: seti_account_key}
+
+  # Create a Network Port for that instance
+  node2_port0:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: privnet_id }
+      fixed_ips:
+        - subnet_id: { get_param: privsubnet_id }
+  # Associate a floating IP to that instance
+  node2_public:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: pubnet_id }
+      port_id: { get_resource: node2_port0 }
+  node3:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node3_hostname }
+      flavor: { get_param: flavor_size }
+      image: { get_param: os_image }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: node3_port0 }
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -x
+            export SETI_ACCOUNT_KEY=P_SETI_ACCOUNT_KEY
+            echo "MTU=1450" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+            service network restart
+            hostname seti3.cloud.example.com
+            echo "" > /var/lib/boinc/gui_rpc_auth.cfg
+            systemctl enable boinc-client
+            systemctl start boinc-client
+            # wait for boinc to settle
+            sleep 30
+            boinccmd --project_attach http://setiathome.berkeley.edu $SETI_ACCOUNT_KEY
+          params:
+            P_SETI_ACCOUNT_KEY: { get_param: seti_account_key}
+
+  # Create a Network Port for that instance
+  node3_port0:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: privnet_id }
+      fixed_ips:
+        - subnet_id: { get_param: privsubnet_id }
+  # Associate a floating IP to that instance
+  node3_public:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: pubnet_id }
+      port_id: { get_resource: node3_port0 }
+
+outputs:
+  # Output our fixed and floating IPs - This will be shown in 'heat stack-show'
+  node0_private_ip:
+    description: IP address of node0 in private network
+    value: { get_attr: [ node0, first_address ] }
+  node0_public_ip:
+    description: Floating IP address of node0 in public network
+    value: { get_attr: [ node0_public, floating_ip_address ] }
+  node1_private_ip:
+    description: IP address of node0 in private network
+    value: { get_attr: [ node1, first_address ] }
+  node1_public_ip:
+    description: Floating IP address of node0 in public network
+    value: { get_attr: [ node1_public, floating_ip_address ] }
+  node2_private_ip:
+    description: IP address of node0 in private network
+    value: { get_attr: [ node2, first_address ] }
+  node2_public_ip:
+    description: Floating IP address of node0 in public network
+    value: { get_attr: [ node2_public, floating_ip_address ] }
+  node3_private_ip:
+    description: IP address of node0 in private network
+    value: { get_attr: [ node3, first_address ] }
+  node3_public_ip:
+    description: Floating IP address of node0 in public network
+    value: { get_attr: [ node3_public, floating_ip_address ] }

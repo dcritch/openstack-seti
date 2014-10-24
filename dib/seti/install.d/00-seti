@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -ex
+
+SETI_PKGS="boinc-client boinc-manager"
+
+yum update -y
+install-packages $SETI_PKGS --skip-broken
+

@@ -1,0 +1,7 @@
+parameters:
+  key_name: KEY_NAME
+  seti_account_key: SETI_ACCOUNT_KEY
+  privnet_id: PRIVNET_ID
+  pubnet_id: PUBNET_ID
+  privsubnet_id: PRIVSUBNET_ID
+
