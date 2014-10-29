@@ -1,7 +1,8 @@
 parameters:
-  key_name: KEY_NAME
-  seti_account_key: SETI_ACCOUNT_KEY
-  privnet_id: PRIVNET_ID
-  pubnet_id: PUBNET_ID
-  privsubnet_id: PRIVSUBNET_ID
-
+  key_name: CHANGEME
+  seti_account_key: CHANGEME
+  privnet_id: CHANGEME
+  pubnet_id: CHANGEME
+  privsubnet_id: CHANGEME
+  rhn_server_url: CHANGEME
+  rhn_activation_key: CHANGEME

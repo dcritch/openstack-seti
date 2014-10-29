@@ -2,7 +2,7 @@
 
 set -ex
 
-SETI_PKGS="boinc-client boinc-manager"
+SETI_PKGS="boinc-client boinc-manager rhn-client-tools rhn-setup"
 
 yum update -y
 install-packages $SETI_PKGS --skip-broken
